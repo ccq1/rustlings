@@ -3,3 +3,5 @@ solutions
 Cargo.lock
 target
 .vscode
+*.exe
+*.pdb
