@@ -5,7 +5,10 @@
 // https://doc.rust-lang.org/std/convert/trait.TryFrom.html
 
 #![allow(clippy::useless_vec)]
-use std::convert::{TryFrom, TryInto};
+use std::{
+    convert::{TryFrom, TryInto},
+    ops::RangeInclusive,
+};
 
 #[derive(Debug, PartialEq)]
 struct Color {
@@ -28,14 +31,38 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        const RANGE: RangeInclusive<i16> = 0..=255;
+
+        if RANGE.contains(&tuple.0) && RANGE.contains(&tuple.1) && RANGE.contains(&tuple.2) {
+            Ok(Self {
+                red: tuple.0 as u8,
+                green: tuple.1 as u8,
+                blue: tuple.2 as u8,
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        }
+    }
 }
 
 // TODO: Array implementation.
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        const RANGE: RangeInclusive<i16> = 0..=255;
+
+        if RANGE.contains(&arr[0]) && RANGE.contains(&arr[1]) && RANGE.contains(&arr[2]) {
+            Ok(Self {
+                red: arr[0] as u8,
+                green: arr[1] as u8,
+                blue: arr[2] as u8,
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        }
+    }
 }
 
 // TODO: Slice implementation.
@@ -43,7 +70,23 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        const RANGE: RangeInclusive<i16> = 0..=255;
+
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+
+        if RANGE.contains(&slice[0]) && RANGE.contains(&slice[1]) && RANGE.contains(&slice[2]) {
+            Ok(Self {
+                red: slice[0] as u8,
+                green: slice[1] as u8,
+                blue: slice[2] as u8,
+            })
+        } else {
+            Err(IntoColorError::IntConversion)
+        }
+    }
 }
 
 fn main() {
